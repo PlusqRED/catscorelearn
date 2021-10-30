@@ -21,6 +21,7 @@ object Readers {
     println(checkLogin(4, "davinci").run(db))
   }
 
+  import cats.syntax.applicative._
   def checkLogin(userId: Int, password: String): DbReader[Boolean] = {
     for {
       usernameOption <- findUsername(userId)
