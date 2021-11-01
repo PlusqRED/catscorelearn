@@ -1,6 +1,7 @@
 package com.grape
 
 import cats.Show
+import cats.effect.IO
 
 object Playground {
   trait Printable[A] {
@@ -16,4 +17,6 @@ object Playground {
   object Printable {
     def print[A: Show](a: A): Unit = println(Show[A].show(a))
   }
+
+  def main(args: Array[String]): Unit = {}
 }
