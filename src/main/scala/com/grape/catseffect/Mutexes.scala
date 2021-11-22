@@ -2,6 +2,7 @@ package com.grape.catseffect
 
 import cats.Id
 import cats.effect.kernel.Ref
+import cats.effect.std.Semaphore
 import cats.effect.{Deferred, IO, IOApp}
 import cats.syntax.parallel._
 import com.grape.utils.Utils.Util
@@ -61,6 +62,19 @@ object Mutexes extends IOApp.Simple {
     results <- (1 to 3).toList.parTraverse(id => createLockingTask(id, mutex))
   } yield results
 
+  val mutex = Semaphore[IO](1)
+  val users = (1 to 10).toList.parTraverse { id =>
+    for {
+      sem <- mutex
+      _ <- IO(s"[task $id] waiting for permission...").debug
+      _ <- sem.acquire
+      _ <- IO(s"[task $id] working...").debug
+      res <- criticalTask()
+      _ <- IO(s"[task $id] got result: $res").debug
+      _ <- sem.release
+      _ <- IO(s"[task $id] lock removed.").debug
+    } yield res
+  }
   override def run: IO[Unit] = for {
     res <- demoLockingTasks()
     _ <- IO(res).debug
